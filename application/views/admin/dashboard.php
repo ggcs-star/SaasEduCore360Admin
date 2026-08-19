@@ -69,44 +69,52 @@
         <!-- ========================================= -->
         <div class="cards-row">
             <div class="col-md-custom-5">
-                <div class="stat-card stat-card-purple">
-                    <div class="stat-card-icon"><i class="fa fa-money"></i></div>
-                    <div class="stat-card-content">
-                        <span class="stat-label">Monthly Fees</span>
-                        <h3 class="stat-number"><?php echo $currency_symbol . $month_collection; ?></h3>
-                        <span class="stat-trend up"><i class="fa fa-arrow-up"></i> 10%</span>
+                <a href="<?php echo base_url('studentfee'); ?>" style="text-decoration: none; display: block; color: inherit;" class="hover-card">
+                    <div class="stat-card stat-card-purple">
+                        <div class="stat-card-icon"><i class="fa fa-money"></i></div>
+                        <div class="stat-card-content">
+                            <span class="stat-label">Monthly Fees</span>
+                            <h3 class="stat-number"><?php echo $currency_symbol . $month_collection; ?></h3>
+                            <span class="stat-trend up"><i class="fa fa-arrow-up"></i> 10%</span>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-custom-5">
-                <div class="stat-card stat-card-green">
-                    <div class="stat-card-icon"><i class="fa fa-credit-card"></i></div>
-                    <div class="stat-card-content">
-                        <span class="stat-label">Monthly Expenses</span>
-                        <h3 class="stat-number"><?php echo $currency_symbol . $month_expense; ?></h3>
-                        <span class="stat-trend down"><i class="fa fa-arrow-down"></i> 10%</span>
+                <a href="<?php echo base_url('admin/expense'); ?>" style="text-decoration: none; display: block; color: inherit;" class="hover-card">
+                    <div class="stat-card stat-card-green">
+                        <div class="stat-card-icon"><i class="fa fa-credit-card"></i></div>
+                        <div class="stat-card-content">
+                            <span class="stat-label">Monthly Expenses</span>
+                            <h3 class="stat-number"><?php echo $currency_symbol . $month_expense; ?></h3>
+                            <span class="stat-trend down"><i class="fa fa-arrow-down"></i> 10%</span>
+                        </div>
                     </div>
-                </div>
+                </a>
+            </div>
+           <div class="col-md-custom-5">
+                <a href="<?php echo base_url('student/search'); ?>" style="text-decoration: none; display: block; color: inherit;" class="hover-card">
+                    <div class="stat-card stat-card-blue">
+                        <div class="stat-card-icon"><i class="fa fa-users"></i></div>
+                        <div class="stat-card-content">
+                            <span class="stat-label">Students</span>
+                            <h3 class="stat-number"><?php echo $total_students; ?></h3>
+                            <span class="stat-trend up"><i class="fa fa-arrow-up"></i> 10%</span>
+                        </div>
+                    </div>
+                </a>
             </div>
             <div class="col-md-custom-5">
-                <div class="stat-card stat-card-blue">
-                    <div class="stat-card-icon"><i class="fa fa-users"></i></div>
-                    <div class="stat-card-content">
-                        <span class="stat-label">Students</span>
-                        <h3 class="stat-number"><?php echo $total_students; ?></h3>
-                        <span class="stat-trend up"><i class="fa fa-arrow-up"></i> 10%</span>
+                <a href="<?php echo base_url('admin/teacher/assign_class_teacher'); ?>" style="text-decoration: none; display: block; color: inherit;" class="hover-card">
+                    <div class="stat-card stat-card-pink">
+                        <div class="stat-card-icon"><i class="fa fa-user"></i></div>
+                        <div class="stat-card-content">
+                            <span class="stat-label">Teachers</span>
+                            <h3 class="stat-number"><?php echo isset($roles['Teacher']) ? $roles['Teacher'] : 0; ?></h3>
+                            <span class="stat-trend up"><i class="fa fa-arrow-up"></i> 10%</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-custom-5">
-                <div class="stat-card stat-card-pink">
-                    <div class="stat-card-icon"><i class="fa fa-user"></i></div>
-                    <div class="stat-card-content">
-                        <span class="stat-label">Teachers</span>
-                        <h3 class="stat-number"><?php echo isset($roles['Teacher']) ? $roles['Teacher'] : 0; ?></h3>
-                        <span class="stat-trend up"><i class="fa fa-arrow-up"></i> 10%</span>
-                    </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-custom-5">
                 <div class="stat-card stat-card-orange">
@@ -301,7 +309,7 @@
                     height: 250,
                     toolbar: { show: false }
                 },
-                colors: ['#6c5ce7', '#e17055'],  // Purple for Fees, Red/Orange for Expenses
+                colors: ['#6c5ce7', '#e17055'],  
                 stroke: { curve: 'smooth', width: 2 },
                 fill: {
                     type: 'gradient',

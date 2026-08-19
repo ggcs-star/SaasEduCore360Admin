@@ -19,7 +19,7 @@ class Homework extends Student_Controller {
         $data["created_by"] = "";
         $data["evaluated_by"] = "";
         $userdata = $this->customlib->getLoggedInUserData();
-        $student_id = $userdata["student_id"];
+        $student_id = $userdata["id"]; // ya jaisa bhi key print_r mein aaye
         $result = $this->student_model->getRecentRecord($student_id);
         $class_id = $result["class_id"];
         $section_id = $result["section_id"];

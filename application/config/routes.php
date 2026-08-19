@@ -83,3 +83,7 @@ $route['user/api/calendar/task'] = 'api/user/calendar/task';
 $route['user/api/calendar/add-task'] = 'api/user/calendar/add_task';
 $route['user/api/calendar/complete-task'] = 'api/user/calendar/complete_task';
 $route['user/api/calendar/delete-task'] = 'api/user/calendar/delete_task';
+$route['user/api/homework'] = 'api/user/homework/index';
+$route['user/api/homework/detail'] = 'api/user/homework/detail';
+$route['user/api/homework/download'] = 'api/user/homework/download';
+$route['user/api/teachers'] = 'api/user/teacher/index';

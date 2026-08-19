@@ -16,13 +16,21 @@ class Auth extends CI_Controller
     }
 
     /**
-     * Student Login API
+     * Login API
      *
-     * POST /user/api/login
+     * Method: POST
+     * URL: /user/api/login
+     *
+     * Allowed roles:
+     * - student
+     * - parent
      */
     public function login()
     {
-        // Only POST request allowed
+        // --------------------------------------------------
+        // 1. Only POST allowed
+        // --------------------------------------------------
+
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->jsonResponse(
                 false,
@@ -32,7 +40,10 @@ class Auth extends CI_Controller
             );
         }
 
-        // Support JSON request
+        // --------------------------------------------------
+        // 2. Read JSON / form-data
+        // --------------------------------------------------
+
         $input = json_decode(
             $this->input->raw_input_stream,
             true
@@ -42,7 +53,10 @@ class Auth extends CI_Controller
             $input = $this->input->post();
         }
 
-        // Get username/password
+        // --------------------------------------------------
+        // 3. Username & Password
+        // --------------------------------------------------
+
         $username = isset($input['username'])
             ? trim($input['username'])
             : '';
@@ -51,7 +65,6 @@ class Auth extends CI_Controller
             ? $input['password']
             : '';
 
-        // Validation
         if ($username === '' || $password === '') {
             return $this->jsonResponse(
                 false,
@@ -61,7 +74,10 @@ class Auth extends CI_Controller
             );
         }
 
-        // Existing MVC login logic
+        // --------------------------------------------------
+        // 4. Existing MVC Login Logic
+        // --------------------------------------------------
+
         $login_post = [
             'username' => $username,
             'password' => $password
@@ -69,7 +85,10 @@ class Auth extends CI_Controller
 
         $login_details = $this->user_model->checkLogin($login_post);
 
-        // Invalid username/password
+        // --------------------------------------------------
+        // 5. Invalid Login
+        // --------------------------------------------------
+
         if (empty($login_details)) {
             return $this->jsonResponse(
                 false,
@@ -79,20 +98,28 @@ class Auth extends CI_Controller
             );
         }
 
-        // Existing login returns array of objects
         $user = $login_details[0];
 
-        // Only student login allowed
-        if ($user->role !== 'student') {
+        // --------------------------------------------------
+        // 6. Allow only Student / Parent
+        // --------------------------------------------------
+
+        if (
+            $user->role !== 'student' &&
+            $user->role !== 'parent'
+        ) {
             return $this->jsonResponse(
                 false,
-                'Only student login is allowed',
+                'Only student and parent login is allowed',
                 [],
                 403
             );
         }
 
-        // Check account status
+        // --------------------------------------------------
+        // 7. Account Status
+        // --------------------------------------------------
+
         if ($user->is_active !== 'yes') {
             return $this->jsonResponse(
                 false,
@@ -102,95 +129,196 @@ class Auth extends CI_Controller
             );
         }
 
-        // Get complete student information
-        $result = $this->user_model->read_user_information($user->id);
+        // --------------------------------------------------
+        // 8. TOKEN
+        // --------------------------------------------------
 
-        if (empty($result)) {
+        $current_time = date('Y-m-d H:i:s');
+
+        $existing_token = $this->db
+            ->where('users_id', $user->id)
+            ->order_by('id', 'DESC')
+            ->get('users_authentication')
+            ->row_array();
+
+        // --------------------------------------------------
+        // 9. Reuse existing valid token
+        // --------------------------------------------------
+
+        if (
+            !empty($existing_token) &&
+            !empty($existing_token['token']) &&
+            !empty($existing_token['expired_at']) &&
+            strtotime($existing_token['expired_at']) > time()
+        ) {
+
+            $token = $existing_token['token'];
+            $expired_at = $existing_token['expired_at'];
+
+        } else {
+
+            // --------------------------------------------------
+            // 10. Generate new token
+            // --------------------------------------------------
+
+            try {
+                $token = bin2hex(random_bytes(32));
+            } catch (Exception $e) {
+                return $this->jsonResponse(
+                    false,
+                    'Unable to generate authentication token',
+                    [],
+                    500
+                );
+            }
+
+            // Token valid for 30 days
+            $expired_at = date(
+                'Y-m-d H:i:s',
+                strtotime('+30 days')
+            );
+
+            // --------------------------------------------------
+            // 11. Update existing expired token
+            // --------------------------------------------------
+
+            if (!empty($existing_token)) {
+
+                $updated = $this->db
+                    ->where('id', $existing_token['id'])
+                    ->update(
+                        'users_authentication',
+                        [
+                            'token'      => $token,
+                            'expired_at' => $expired_at,
+                            'updated_at' => $current_time
+                        ]
+                    );
+
+                if (!$updated) {
+                    return $this->jsonResponse(
+                        false,
+                        'Unable to update authentication token',
+                        [],
+                        500
+                    );
+                }
+
+            } else {
+
+                // --------------------------------------------------
+                // 12. First login - create token
+                // --------------------------------------------------
+
+                $inserted = $this->db
+                    ->insert(
+                        'users_authentication',
+                        [
+                            'users_id'   => $user->id,
+                            'token'      => $token,
+                            'expired_at' => $expired_at,
+                            'created_at' => $current_time,
+                            'updated_at' => $current_time
+                        ]
+                    );
+
+                if (!$inserted) {
+                    return $this->jsonResponse(
+                        false,
+                        'Unable to create authentication token',
+                        [],
+                        500
+                    );
+                }
+            }
+        }
+
+        // --------------------------------------------------
+        // 13. Student Response
+        // --------------------------------------------------
+
+        if ($user->role === 'student') {
+
+            $result = $this->user_model
+                ->read_user_information($user->id);
+
+            if (empty($result)) {
+                return $this->jsonResponse(
+                    false,
+                    'Student account information not found',
+                    [],
+                    404
+                );
+            }
+
+            $student = $result[0];
+
+            $data = [
+                'token'      => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => $expired_at,
+
+                'user' => [
+                    'id'        => $user->id,
+                    'username'  => $student->username,
+                    'firstname' => $student->firstname,
+                    'lastname'  => $student->lastname,
+                    'role'      => 'student',
+                    'image'     => $student->image
+                ]
+            ];
+
             return $this->jsonResponse(
-                false,
-                'Account Suspended',
-                [],
-                403
+                true,
+                'Login successful',
+                $data,
+                200
             );
         }
 
-        $student = $result[0];
+        // --------------------------------------------------
+        // 14. Parent Response
+        // --------------------------------------------------
 
-        // Generate secure random token
-        try {
-            $token = bin2hex(random_bytes(32));
-        } catch (Exception $e) {
+        if ($user->role === 'parent') {
+
+            $data = [
+                'token'       => $token,
+                'token_type'  => 'Bearer',
+                'expires_at'  => $expired_at,
+
+                'user' => [
+                    'id'       => $user->id,
+                    'username' => $user->username,
+                    'role'     => 'parent',
+                    'child_id' => !empty($user->childs)
+                        ? $user->childs
+                        : null
+                ]
+            ];
+
             return $this->jsonResponse(
-                false,
-                'Unable to generate authentication token',
-                [],
-                500
+                true,
+                'Login successful',
+                $data,
+                200
             );
         }
 
-        // Token expiry - 30 days
-        $expired_at = date(
-            'Y-m-d H:i:s',
-            strtotime('+30 days')
-        );
-
-        /*
-         * Save API token in existing table
-         *
-         * users_authentication:
-         * users_id
-         * token
-         * expired_at
-         * created_at
-         * updated_at
-         */
-        $token_data = [
-            'users_id'   => $user->id,
-            'token'      => $token,
-            'expired_at' => $expired_at,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-
-        $inserted = $this->db
-            ->insert('users_authentication', $token_data);
-
-        // Token save failed
-        if (!$inserted) {
-            return $this->jsonResponse(
-                false,
-                'Unable to create authentication token',
-                [],
-                500
-            );
-        }
-
-        // Login response
-        $data = [
-            'token'      => $token,
-            'token_type' => 'Bearer',
-
-            'student' => [
-                'id'        => $student->user_id,
-                'user_id'   => $student->id,
-                'username'  => $student->username,
-                'firstname' => $student->firstname,
-                'lastname'  => $student->lastname,
-                'role'      => $student->role,
-                'image'     => $student->image
-            ]
-        ];
+        // --------------------------------------------------
+        // 15. Fallback
+        // --------------------------------------------------
 
         return $this->jsonResponse(
-            true,
-            'Login successful',
-            $data,
-            200
+            false,
+            'Unable to process login',
+            [],
+            403
         );
     }
 
     /**
-     * Common JSON response
+     * Common JSON Response
      */
     private function jsonResponse(
         $status,
@@ -202,11 +330,15 @@ class Auth extends CI_Controller
             ->set_content_type('application/json')
             ->set_status_header($httpCode)
             ->set_output(
-                json_encode([
-                    'status'  => $status,
-                    'message' => $message,
-                    'data'    => $data
-                ])
+                json_encode(
+                    [
+                        'status'  => $status,
+                        'message' => $message,
+                        'data'    => $data
+                    ],
+                    JSON_UNESCAPED_UNICODE |
+                    JSON_UNESCAPED_SLASHES
+                )
             );
     }
 }

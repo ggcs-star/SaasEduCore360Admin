@@ -86,6 +86,7 @@ $route['user/api/homework'] = 'api/user/homework/index';
 $route['user/api/homework/detail'] = 'api/user/homework/detail';
 $route['user/api/homework/download'] = 'api/user/homework/download';
 $route['user/api/teachers'] = 'api/user/teacher/index';
+$route['user/api/content'] = 'api/user/content/index';
 $route['user/api/exams'] = 'api/user/exam/index';
 $route['user/api/marks'] = 'api/user/mark/index';
 $route['user/api/notifications'] = 'api/user/notification/index';

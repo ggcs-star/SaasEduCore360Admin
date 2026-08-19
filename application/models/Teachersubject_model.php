@@ -81,42 +81,68 @@ class Teachersubject_model extends CI_Model {
 
         return $query->result_array();
     }
+public function getSubjectByClsandSection($class_id, $section_id, $classteacher = 'yes')
+{
+    $userdata = $this->customlib->getUserData();
+$role_id = $userdata["role_id"] ?? null;
+$class_teacher = $userdata["class_teacher"] ?? null;
 
-    public function getSubjectByClsandSection($class_id, $section_id,$classteacher = 'yes') {
+if ($role_id == 2 && $class_teacher == "yes") {
 
+    $cquery = $this->db
+        ->select("classes.*")
+        ->join(
+            "classes",
+            "class_teacher.class_id = classes.id"
+        )
+        ->where(
+            "class_teacher.staff_id",
+            $userdata["id"]
+        )
+        ->where(
+            "classes.id",
+            $class_id
+        )
+        ->get("class_teacher");
 
-          $userdata = $this->customlib->getUserData();
-        $role_id = $userdata["role_id"];
-
-        if (isset($role_id) && ($userdata["role_id"] == 2) && ($userdata["class_teacher"] == "yes")) {
-              $cquery = $this->db->select("classes.*")->join("classes", "class_teacher.class_id = classes.id")->where("class_teacher.staff_id", $userdata["id"])->where("classes.id", $class_id)->get("class_teacher");
-              if($cquery->num_rows() > 0 ){
-
-                $classteacher = 'no';
-              }else{
-                $classteacher = 'yes';
-              }
-
-            if ($classteacher == 'yes') {
-               
-             //   $this->db->where("teacher_subjects.teacher_id",$userdata["id"]);
-                $where = " and teacher_subjects.teacher_id = ".$userdata["id"];
-            } else {
-                $where = " ";
-              
-            }
-        }else{
-             $where = " ";
-
-        }
-
-    
-         $sql = "SELECT teacher_subjects.*,staff.name as `teacher_name`, staff.surname, subjects.name,subjects.type,subjects.code FROM `teacher_subjects` INNER JOIN subjects ON teacher_subjects.subject_id = subjects.id INNER JOIN class_sections ON teacher_subjects.class_section_id = class_sections.id INNER JOIN staff ON staff.id = teacher_subjects.teacher_id  WHERE class_sections.class_id =" . $this->db->escape($class_id) . " and class_sections.section_id=" . $this->db->escape($section_id) . " and teacher_subjects.session_id=" . $this->db->escape($this->current_session). " ".$where;
-
-        $query = $this->db->query($sql);
-
-        return $query->result_array();
+    if ($cquery->num_rows() > 0) {
+        $classteacher = 'no';
+    } else {
+        $classteacher = 'yes';
     }
+
+    if ($classteacher == 'yes') {
+        $where = " and teacher_subjects.teacher_id = " . $userdata["id"];
+    } else {
+        $where = " ";
+    }
+
+} else {
+    $where = " ";
+}
+
+$sql = "SELECT teacher_subjects.*,
+        staff.name as `teacher_name`,
+        staff.surname,
+        subjects.name,
+        subjects.type,
+        subjects.code
+        FROM `teacher_subjects`
+        INNER JOIN subjects
+            ON teacher_subjects.subject_id = subjects.id
+        INNER JOIN class_sections
+            ON teacher_subjects.class_section_id = class_sections.id
+        INNER JOIN staff
+            ON staff.id = teacher_subjects.teacher_id
+        WHERE class_sections.class_id = " . $this->db->escape($class_id) . "
+        AND class_sections.section_id = " . $this->db->escape($section_id) . "
+        AND teacher_subjects.session_id = " . $this->db->escape($this->current_session) . "
+        " . $where;
+
+$query = $this->db->query($sql);
+
+return $query->result_array();
+}
 
     function getTeacherClassSubjects($teacher_id) {
         $this->db->select('teacher_subjects.*,subjects.name,classes.class,sections.section');

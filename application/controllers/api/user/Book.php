@@ -17,11 +17,6 @@ class Book extends CI_Controller
         $this->load->model('librarymember_model');
     }
 
-    /**
-     * Available Library Books
-     *
-     * POST /user/api/books
-     */
     public function index()
     {
         if ($this->input->method(TRUE) !== 'POST') {
@@ -69,17 +64,9 @@ class Book extends CI_Controller
         ], 200);
     }
 
-    /**
-     * My Issued Books
-     *
-     * POST /user/api/my-books
-     */
     public function my_books()
     {
-        // ---------------------------------------
-        // 1. Only POST request allowed
-        // ---------------------------------------
-
+        
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -87,10 +74,6 @@ class Book extends CI_Controller
                 'data'    => []
             ], 405);
         }
-
-        // ---------------------------------------
-        // 2. Authenticate Bearer Token
-        // ---------------------------------------
 
         $user_id = $this->api_auth->userId();
 
@@ -102,10 +85,6 @@ class Book extends CI_Controller
             ], 401);
         }
 
-        // ---------------------------------------
-        // 3. Get Student
-        // ---------------------------------------
-
         $student = $this->student_model->get($user_id);
 
         if (empty($student)) {
@@ -116,10 +95,6 @@ class Book extends CI_Controller
             ], 404);
         }
 
-        // ---------------------------------------
-        // 4. Existing MVC Library Logic
-        // ---------------------------------------
-
         $member_type = 'student';
 
         $book_list = $this->librarymember_model
@@ -127,11 +102,6 @@ class Book extends CI_Controller
                 $member_type,
                 $user_id
             );
-
-        // ---------------------------------------
-        // 5. Student is not library member
-        // OR no issued books
-        // ---------------------------------------
 
         if ($book_list === false || empty($book_list)) {
             return $this->response([
@@ -141,10 +111,6 @@ class Book extends CI_Controller
             ], 200);
         }
 
-        // ---------------------------------------
-        // 6. Issued Books Response
-        // ---------------------------------------
-
         return $this->response([
             'status'  => true,
             'message' => 'Issued books fetched successfully',
@@ -152,9 +118,6 @@ class Book extends CI_Controller
         ], 200);
     }
 
-    /**
-     * JSON Response
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

@@ -16,16 +16,6 @@ class Calendar extends CI_Controller
         $this->load->model('calendar_model');
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Calendar Events
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/calendar/events
-     *
-     * Returns public events and tasks visible through
-     * the existing Calendar model logic.
-     */
     public function events()
     {
         if ($this->input->method(TRUE) !== 'POST') {
@@ -64,12 +54,6 @@ class Calendar extends CI_Controller
 
             foreach ($result as $value) {
 
-                /*
-                 * Public events are visible.
-                 *
-                 * Tasks are visible only when the task
-                 * belongs to the logged-in student.
-                 */
                 if ($value['event_type'] === 'task') {
 
                     if ((string) $value['event_for'] !== (string) $user_id) {
@@ -99,13 +83,6 @@ class Calendar extends CI_Controller
         ], 200);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * My Tasks
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/calendar/tasks
-     */
     public function tasks()
     {
         if ($this->input->method(TRUE) !== 'POST') {
@@ -135,19 +112,6 @@ class Calendar extends CI_Controller
                 'data'    => []
             ], 404);
         }
-
-        /*
-         * Existing MVC logic:
-         *
-         * getTask(
-         *     10,
-         *     offset,
-         *     student_id,
-         *     0
-         * )
-         *
-         * role_id = 0 as used in existing Student Calendar.
-         */
 
         $tasks = $this->calendar_model->getTask(
             100,
@@ -188,18 +152,6 @@ class Calendar extends CI_Controller
         ], 200);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Task Details
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/calendar/task
-     *
-     * Body:
-     * {
-     *     "id": 10
-     * }
-     */
     public function task()
     {
         if ($this->input->method(TRUE) !== 'POST') {
@@ -261,11 +213,6 @@ class Calendar extends CI_Controller
             ], 404);
         }
 
-        /*
-         * Student can access:
-         * - public events
-         * - own tasks
-         */
         if (
             $task['event_type'] === 'task' &&
             (string) $task['event_for'] !== (string) $user_id
@@ -284,26 +231,6 @@ class Calendar extends CI_Controller
         ], 200);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Add / Update Todo
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/calendar/add-task
-     *
-     * Create:
-     * {
-     *     "task_title": "Complete Homework",
-     *     "task_date": "2026-08-20 10:00:00"
-     * }
-     *
-     * Update:
-     * {
-     *     "eventid": 10,
-     *     "task_title": "Complete Homework",
-     *     "task_date": "2026-08-20 10:00:00"
-     * }
-     */
     public function add_task()
     {
         if ($this->input->method(TRUE) !== 'POST') {
@@ -386,12 +313,6 @@ class Calendar extends CI_Controller
             $timestamp
         );
 
-        /*
-         * Existing MVC logic:
-         *
-         * event_type = task
-         * event_for  = logged-in student
-         */
         $eventdata = [
             'event_title'       => $task_title,
             'event_description' => '',
@@ -403,7 +324,6 @@ class Calendar extends CI_Controller
             'role_id'           => 0
         ];
 
-        // Update existing task
         if ($event_id > 0) {
 
             $existing = $this->calendar_model
@@ -441,7 +361,6 @@ class Calendar extends CI_Controller
             ], 200);
         }
 
-        // Create new task
         $this->calendar_model->saveEvent($eventdata);
 
         $new_id = $this->db->insert_id();
@@ -455,19 +374,6 @@ class Calendar extends CI_Controller
         ], 201);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Mark Task Complete
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/calendar/complete-task
-     *
-     * Body:
-     * {
-     *     "id": 10,
-     *     "active": "yes"
-     * }
-     */
     public function complete_task()
     {
         if ($this->input->method(TRUE) !== 'POST') {
@@ -557,18 +463,6 @@ class Calendar extends CI_Controller
         ], 200);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Delete Task
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/calendar/delete-task
-     *
-     * Body:
-     * {
-     *     "id": 10
-     * }
-     */
     public function delete_task()
     {
         if ($this->input->method(TRUE) !== 'POST') {
@@ -642,11 +536,6 @@ class Calendar extends CI_Controller
         ], 200);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * JSON Response
-     * ---------------------------------------------------------
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

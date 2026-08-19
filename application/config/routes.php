@@ -68,7 +68,6 @@ $route['page/(:any)'] = 'welcome/page/$1';
 $route['read/(:any)'] = 'welcome/read/$1';
 $route['frontend'] = 'welcome';
 
-
 $route['user/api/login'] = 'api/user/auth/login';
 $route['user/api/attendance'] = 'api/user/attendence/index';
 $route['user/api/subjects'] = 'api/user/subject/index';
@@ -88,3 +87,13 @@ $route['user/api/homework/detail'] = 'api/user/homework/detail';
 $route['user/api/homework/download'] = 'api/user/homework/download';
 $route['user/api/teachers'] = 'api/user/teacher/index';
 $route['user/api/content'] = 'api/user/content/index';
+$route['user/api/exams'] = 'api/user/exam/index';
+$route['user/api/marks'] = 'api/user/mark/index';
+$route['user/api/notifications'] = 'api/user/notification/index';
+$route['user/api/notifications/status'] = 'api/user/notification/updateStatus';
+$route['user/api/timeline'] = 'api/user/timeline/add';
+$route['user/api/route'] = 'api/user/route/index';
+$route['user/api/route/bus-detail'] = 'api/user/route/getbusdetail';
+$route['user/api/hostel'] = 'api/user/hostel/index';
+$route['user/api/hostel/rooms'] = 'api/user/hostel/rooms';
+$route['user/api/hostel/assigned-room'] = 'api/user/hostel/assignedRoom';

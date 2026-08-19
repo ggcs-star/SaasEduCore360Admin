@@ -10,31 +10,14 @@ class Fees extends CI_Controller
     {
         parent::__construct();
 
-        // API authentication
         $this->load->library('api_auth');
 
-        // Existing models
         $this->load->model('student_model');
         $this->load->model('studentfeemaster_model');
     }
 
-    /**
-     * Student Fees API
-     *
-     * Method: POST
-     *
-     * URL:
-     * /user/api/fees
-     *
-     * Authorization:
-     * Bearer {token}
-     */
     public function index()
     {
-        // ---------------------------------------
-        // 1. Only POST request allowed
-        // ---------------------------------------
-
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -42,10 +25,6 @@ class Fees extends CI_Controller
                 'data'    => []
             ], 405);
         }
-
-        // ---------------------------------------
-        // 2. Authenticate Bearer Token
-        // ---------------------------------------
 
         $user_id = $this->api_auth->userId();
 
@@ -57,10 +36,6 @@ class Fees extends CI_Controller
             ], 401);
         }
 
-        // ---------------------------------------
-        // 3. Get Student
-        // ---------------------------------------
-
         $student = $this->student_model->get($user_id);
 
         if (empty($student)) {
@@ -70,10 +45,6 @@ class Fees extends CI_Controller
                 'data'    => []
             ], 404);
         }
-
-        // ---------------------------------------
-        // 4. Check Student Session
-        // ---------------------------------------
 
         if (empty($student['student_session_id'])) {
             return $this->response([
@@ -85,17 +56,9 @@ class Fees extends CI_Controller
 
         $student_session_id = $student['student_session_id'];
 
-        // ---------------------------------------
-        // 5. Get Student Fees
-        // ---------------------------------------
-
         $fees = $this->studentfeemaster_model->getStudentFees(
             $student_session_id
         );
-
-        // ---------------------------------------
-        // 6. No Fees Found
-        // ---------------------------------------
 
         if (empty($fees)) {
             return $this->response([
@@ -105,10 +68,6 @@ class Fees extends CI_Controller
             ], 200);
         }
 
-        // ---------------------------------------
-        // 7. Fees Response
-        // ---------------------------------------
-
         return $this->response([
             'status'  => true,
             'message' => 'Fees fetched successfully',
@@ -116,9 +75,6 @@ class Fees extends CI_Controller
         ], 200);
     }
 
-    /**
-     * JSON Response
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

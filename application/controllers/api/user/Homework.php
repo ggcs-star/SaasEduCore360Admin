@@ -16,19 +16,8 @@ class Homework extends CI_Controller
         $this->load->model('homework_model');
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Homework List
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/homework
-     *
-     * Returns homework assigned to the logged-in
-     * student's class and section.
-     */
     public function index()
     {
-        // Only POST
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -37,7 +26,6 @@ class Homework extends CI_Controller
             ], 405);
         }
 
-        // Authenticate
         $student_id = $this->api_auth->userId();
 
         if (empty($student_id)) {
@@ -48,7 +36,6 @@ class Homework extends CI_Controller
             ], 401);
         }
 
-        // Get student
         $student = $this->student_model->get($student_id);
 
         if (empty($student)) {
@@ -59,7 +46,6 @@ class Homework extends CI_Controller
             ], 404);
         }
 
-        // Get class and section
         $class_id   = $student['class_id'] ?? '';
         $section_id = $student['section_id'] ?? '';
 
@@ -71,7 +57,6 @@ class Homework extends CI_Controller
             ], 200);
         }
 
-        // Existing MVC logic
         $homeworklist = $this->homework_model
             ->getStudentHomework(
                 $class_id,
@@ -86,7 +71,6 @@ class Homework extends CI_Controller
             ], 200);
         }
 
-        // Add student's evaluation report
         foreach ($homeworklist as $key => $homework) {
 
             $report = $this->homework_model
@@ -105,18 +89,6 @@ class Homework extends CI_Controller
         ], 200);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Homework Detail
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/homework/detail
-     *
-     * Body:
-     * {
-     *     "id": 1
-     * }
-     */
     public function detail()
     {
         // Only POST
@@ -128,7 +100,6 @@ class Homework extends CI_Controller
             ], 405);
         }
 
-        // Authenticate
         $student_id = $this->api_auth->userId();
 
         if (empty($student_id)) {
@@ -139,7 +110,6 @@ class Homework extends CI_Controller
             ], 401);
         }
 
-        // Verify student
         $student = $this->student_model->get($student_id);
 
         if (empty($student)) {
@@ -150,7 +120,6 @@ class Homework extends CI_Controller
             ], 404);
         }
 
-        // Read JSON / form-data
         $input = json_decode(
             $this->input->raw_input_stream,
             true
@@ -171,8 +140,6 @@ class Homework extends CI_Controller
                 'data'    => []
             ], 422);
         }
-
-        // Get homework
         $homework = $this->homework_model
             ->getRecord($homework_id);
 
@@ -183,12 +150,6 @@ class Homework extends CI_Controller
                 'data'    => []
             ], 404);
         }
-
-        // --------------------------------------------------
-        // Security:
-        // Student can only access homework assigned to
-        // his/her own class and section.
-        // --------------------------------------------------
 
         if (
             (string) $homework['class_id'] !==
@@ -203,7 +164,6 @@ class Homework extends CI_Controller
             ], 403);
         }
 
-        // Student evaluation report
         $report = $this->homework_model
             ->getEvaluationReportForStudent(
                 $homework_id,
@@ -219,22 +179,8 @@ class Homework extends CI_Controller
         ], 200);
     }
 
-    /**
-     * ---------------------------------------------------------
-     * Homework File Download
-     * ---------------------------------------------------------
-     *
-     * POST /user/api/homework/download
-     *
-     * Body:
-     * {
-     *     "id": 1,
-     *     "doc": "filename.pdf"
-     * }
-     */
     public function download()
     {
-        // Only POST
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -243,7 +189,6 @@ class Homework extends CI_Controller
             ], 405);
         }
 
-        // Authenticate
         $student_id = $this->api_auth->userId();
 
         if (empty($student_id)) {
@@ -254,7 +199,6 @@ class Homework extends CI_Controller
             ], 401);
         }
 
-        // Verify student
         $student = $this->student_model->get($student_id);
 
         if (empty($student)) {
@@ -265,7 +209,6 @@ class Homework extends CI_Controller
             ], 404);
         }
 
-        // Read JSON / form-data
         $input = json_decode(
             $this->input->raw_input_stream,
             true
@@ -298,8 +241,6 @@ class Homework extends CI_Controller
                 'data'    => []
             ], 422);
         }
-
-        // Get homework
         $homework = $this->homework_model
             ->getRecord($homework_id);
 
@@ -310,13 +251,6 @@ class Homework extends CI_Controller
                 'data'    => []
             ], 404);
         }
-
-        // --------------------------------------------------
-        // Security:
-        // Only student's own class/section homework
-        // can be downloaded.
-        // --------------------------------------------------
-
         if (
             (string) $homework['class_id'] !==
                 (string) ($student['class_id'] ?? '') ||
@@ -329,13 +263,6 @@ class Homework extends CI_Controller
                 'data'    => []
             ], 403);
         }
-
-        // --------------------------------------------------
-        // Existing MVC file location
-        //
-        // ./uploads/homework/{id}.{extension}
-        // --------------------------------------------------
-
         $extension = pathinfo($doc, PATHINFO_EXTENSION);
 
         if ($extension === '') {
@@ -345,9 +272,6 @@ class Homework extends CI_Controller
                 'data'    => []
             ], 422);
         }
-
-        // Only use the extension.
-        // Do not allow user-provided path.
         $extension = strtolower($extension);
 
         $allowed_extensions = [
@@ -384,7 +308,6 @@ class Homework extends CI_Controller
             ], 404);
         }
 
-        // Download file
         $this->load->helper('download');
 
         $file_data = file_get_contents($filepath);
@@ -395,11 +318,6 @@ class Homework extends CI_Controller
         );
     }
 
-    /**
-     * ---------------------------------------------------------
-     * JSON Response
-     * ---------------------------------------------------------
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

@@ -10,30 +10,13 @@ class Teacher extends CI_Controller
     {
         parent::__construct();
 
-        // Bearer Token authentication
         $this->load->library('api_auth');
 
-        // Existing model
         $this->load->model('staff_model');
     }
 
-    /**
-     * Get Teacher List
-     *
-     * Method: POST
-     *
-     * URL:
-     * /user/api/teachers
-     *
-     * Authorization:
-     * Bearer {token}
-     */
     public function index()
     {
-        // ---------------------------------------
-        // 1. Only POST allowed
-        // ---------------------------------------
-
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -41,10 +24,6 @@ class Teacher extends CI_Controller
                 'data'    => []
             ], 405);
         }
-
-        // ---------------------------------------
-        // 2. Bearer Token Authentication
-        // ---------------------------------------
 
         $user_id = $this->api_auth->userId();
 
@@ -56,15 +35,7 @@ class Teacher extends CI_Controller
             ], 401);
         }
 
-        // ---------------------------------------
-        // 3. Get Teachers
-        // ---------------------------------------
-
         $teachers = $this->staff_model->getEmployee('Teacher');
-
-        // ---------------------------------------
-        // 4. No teachers found
-        // ---------------------------------------
 
         if (empty($teachers)) {
             return $this->response([
@@ -74,15 +45,10 @@ class Teacher extends CI_Controller
             ], 200);
         }
 
-        // ---------------------------------------
-        // 5. Prepare API response
-        // ---------------------------------------
-
         $data = [];
 
         foreach ($teachers as $teacher) {
 
-            // Handle object/array safely
             $teacher_id = is_object($teacher)
                 ? ($teacher->id ?? '')
                 : ($teacher['id'] ?? '');
@@ -121,10 +87,6 @@ class Teacher extends CI_Controller
             ];
         }
 
-        // ---------------------------------------
-        // 6. Return response
-        // ---------------------------------------
-
         return $this->response([
             'status'  => true,
             'message' => 'Teachers fetched successfully',
@@ -132,9 +94,6 @@ class Teacher extends CI_Controller
         ], 200);
     }
 
-    /**
-     * Common JSON Response
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

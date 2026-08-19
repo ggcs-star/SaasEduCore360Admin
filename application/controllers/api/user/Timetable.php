@@ -10,7 +10,6 @@ class Timetable extends CI_Controller
     {
         parent::__construct();
 
-        // API authentication
         $this->load->library('api_auth');
 
         // Existing models
@@ -18,23 +17,8 @@ class Timetable extends CI_Controller
         $this->load->model('timetable_model');
     }
 
-    /**
-     * Student Timetable API
-     *
-     * Method: POST
-     *
-     * URL:
-     * /user/api/timetable
-     *
-     * Authorization:
-     * Bearer {token}
-     */
     public function index()
     {
-        // ---------------------------------------
-        // 1. Only POST request allowed
-        // ---------------------------------------
-
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -42,10 +26,6 @@ class Timetable extends CI_Controller
                 'data'    => []
             ], 405);
         }
-
-        // ---------------------------------------
-        // 2. Authenticate Bearer Token
-        // ---------------------------------------
 
         $user_id = $this->api_auth->userId();
 
@@ -57,10 +37,6 @@ class Timetable extends CI_Controller
             ], 401);
         }
 
-        // ---------------------------------------
-        // 3. Get student
-        // ---------------------------------------
-
         $student = $this->student_model->get($user_id);
 
         if (empty($student)) {
@@ -71,23 +47,10 @@ class Timetable extends CI_Controller
             ], 404);
         }
 
-        // ---------------------------------------
-        // 4. Student class & section
-        // ---------------------------------------
-
         $class_id   = $student['class_id'];
         $section_id = $student['section_id'];
 
-        // ---------------------------------------
-        // 5. Current session
-        // ---------------------------------------
-
         $current_session = $this->setting_model->getCurrentSession();
-
-        // ---------------------------------------
-        // 6. Get student subjects
-        // Same subject logic as existing MVC
-        // ---------------------------------------
 
         $sql = "SELECT
                     teacher_subjects.*,
@@ -110,11 +73,6 @@ class Timetable extends CI_Controller
         $query = $this->db->query($sql);
 
         $subjects = $query->result_array();
-
-        // ---------------------------------------
-        // 7. No subjects found
-        // ---------------------------------------
-
         if (empty($subjects)) {
             return $this->response([
                 'status'  => true,
@@ -122,11 +80,6 @@ class Timetable extends CI_Controller
                 'data'    => []
             ], 200);
         }
-
-        // ---------------------------------------
-        // 8. Days
-        // Same days used by existing timetable
-        // ---------------------------------------
 
         $days = [
             'Monday',
@@ -139,11 +92,6 @@ class Timetable extends CI_Controller
         ];
 
         $final_array = [];
-
-        // ---------------------------------------
-        // 9. Get timetable subject-wise
-        // ---------------------------------------
-
         foreach ($subjects as $subject) {
 
             $subject_timetable = [];
@@ -179,11 +127,6 @@ class Timetable extends CI_Controller
 
             $final_array[$subject['name']] = $subject_timetable;
         }
-
-        // ---------------------------------------
-        // 10. Final response
-        // ---------------------------------------
-
         return $this->response([
             'status'  => true,
             'message' => 'Timetable fetched successfully',
@@ -191,9 +134,6 @@ class Timetable extends CI_Controller
         ], 200);
     }
 
-    /**
-     * JSON Response
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

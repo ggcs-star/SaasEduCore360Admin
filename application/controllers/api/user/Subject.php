@@ -10,19 +10,13 @@ class Subject extends CI_Controller
     {
         parent::__construct();
 
-        // API authentication
         $this->load->library('api_auth');
 
-        // Existing models
         $this->load->model('student_model');
     }
 
     public function index()
     {
-        // ---------------------------------------
-        // Only POST request allowed
-        // ---------------------------------------
-
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -30,10 +24,6 @@ class Subject extends CI_Controller
                 'data'    => []
             ], 405);
         }
-
-        // ---------------------------------------
-        // Authenticate using Bearer Token
-        // ---------------------------------------
 
         $user_id = $this->api_auth->userId();
 
@@ -44,11 +34,6 @@ class Subject extends CI_Controller
                 'data'    => []
             ], 401);
         }
-
-        // ---------------------------------------
-        // Get student
-        // ---------------------------------------
-
         $student = $this->student_model->get($user_id);
 
         if (empty($student)) {
@@ -59,23 +44,10 @@ class Subject extends CI_Controller
             ], 404);
         }
 
-        // ---------------------------------------
-        // Student class & section
-        // ---------------------------------------
-
         $class_id   = $student['class_id'];
         $section_id = $student['section_id'];
 
-        // ---------------------------------------
-        // Current session
-        // ---------------------------------------
-
         $current_session = $this->setting_model->getCurrentSession();
-
-        // ---------------------------------------
-        // SAME SUBJECT QUERY USED BY
-        // EXISTING TEACHERSUBJECT MODEL
-        // ---------------------------------------
 
         $sql = "SELECT
                     teacher_subjects.*,
@@ -99,10 +71,6 @@ class Subject extends CI_Controller
 
         $subjects = $query->result_array();
 
-        // ---------------------------------------
-        // No subjects
-        // ---------------------------------------
-
         if (empty($subjects)) {
             return $this->response([
                 'status'  => true,
@@ -110,10 +78,6 @@ class Subject extends CI_Controller
                 'data'    => []
             ], 200);
         }
-
-        // ---------------------------------------
-        // Same response format
-        // ---------------------------------------
 
         $data = [];
 
@@ -127,10 +91,6 @@ class Subject extends CI_Controller
             ];
         }
 
-        // ---------------------------------------
-        // Final response
-        // ---------------------------------------
-
         return $this->response([
             'status'  => true,
             'message' => 'Subjects fetched successfully',
@@ -138,9 +98,6 @@ class Subject extends CI_Controller
         ], 200);
     }
 
-    /**
-     * JSON Response
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

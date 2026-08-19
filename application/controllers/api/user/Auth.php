@@ -15,22 +15,8 @@ class Auth extends CI_Controller
         $this->load->database();
     }
 
-    /**
-     * Login API
-     *
-     * Method: POST
-     * URL: /user/api/login
-     *
-     * Allowed roles:
-     * - student
-     * - parent
-     */
     public function login()
     {
-        // --------------------------------------------------
-        // 1. Only POST allowed
-        // --------------------------------------------------
-
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->jsonResponse(
                 false,
@@ -40,10 +26,6 @@ class Auth extends CI_Controller
             );
         }
 
-        // --------------------------------------------------
-        // 2. Read JSON / form-data
-        // --------------------------------------------------
-
         $input = json_decode(
             $this->input->raw_input_stream,
             true
@@ -52,10 +34,6 @@ class Auth extends CI_Controller
         if (!is_array($input)) {
             $input = $this->input->post();
         }
-
-        // --------------------------------------------------
-        // 3. Username & Password
-        // --------------------------------------------------
 
         $username = isset($input['username'])
             ? trim($input['username'])
@@ -74,20 +52,12 @@ class Auth extends CI_Controller
             );
         }
 
-        // --------------------------------------------------
-        // 4. Existing MVC Login Logic
-        // --------------------------------------------------
-
         $login_post = [
             'username' => $username,
             'password' => $password
         ];
 
         $login_details = $this->user_model->checkLogin($login_post);
-
-        // --------------------------------------------------
-        // 5. Invalid Login
-        // --------------------------------------------------
 
         if (empty($login_details)) {
             return $this->jsonResponse(
@@ -99,11 +69,6 @@ class Auth extends CI_Controller
         }
 
         $user = $login_details[0];
-
-        // --------------------------------------------------
-        // 6. Allow only Student / Parent
-        // --------------------------------------------------
-
         if (
             $user->role !== 'student' &&
             $user->role !== 'parent'
@@ -116,10 +81,6 @@ class Auth extends CI_Controller
             );
         }
 
-        // --------------------------------------------------
-        // 7. Account Status
-        // --------------------------------------------------
-
         if ($user->is_active !== 'yes') {
             return $this->jsonResponse(
                 false,
@@ -129,10 +90,6 @@ class Auth extends CI_Controller
             );
         }
 
-        // --------------------------------------------------
-        // 8. TOKEN
-        // --------------------------------------------------
-
         $current_time = date('Y-m-d H:i:s');
 
         $existing_token = $this->db
@@ -140,10 +97,6 @@ class Auth extends CI_Controller
             ->order_by('id', 'DESC')
             ->get('users_authentication')
             ->row_array();
-
-        // --------------------------------------------------
-        // 9. Reuse existing valid token
-        // --------------------------------------------------
 
         if (
             !empty($existing_token) &&
@@ -157,10 +110,6 @@ class Auth extends CI_Controller
 
         } else {
 
-            // --------------------------------------------------
-            // 10. Generate new token
-            // --------------------------------------------------
-
             try {
                 $token = bin2hex(random_bytes(32));
             } catch (Exception $e) {
@@ -172,15 +121,10 @@ class Auth extends CI_Controller
                 );
             }
 
-            // Token valid for 30 days
             $expired_at = date(
                 'Y-m-d H:i:s',
                 strtotime('+30 days')
             );
-
-            // --------------------------------------------------
-            // 11. Update existing expired token
-            // --------------------------------------------------
 
             if (!empty($existing_token)) {
 
@@ -206,10 +150,6 @@ class Auth extends CI_Controller
 
             } else {
 
-                // --------------------------------------------------
-                // 12. First login - create token
-                // --------------------------------------------------
-
                 $inserted = $this->db
                     ->insert(
                         'users_authentication',
@@ -232,11 +172,6 @@ class Auth extends CI_Controller
                 }
             }
         }
-
-        // --------------------------------------------------
-        // 13. Student Response
-        // --------------------------------------------------
-
         if ($user->role === 'student') {
 
             $result = $this->user_model
@@ -276,10 +211,6 @@ class Auth extends CI_Controller
             );
         }
 
-        // --------------------------------------------------
-        // 14. Parent Response
-        // --------------------------------------------------
-
         if ($user->role === 'parent') {
 
             $data = [
@@ -305,10 +236,6 @@ class Auth extends CI_Controller
             );
         }
 
-        // --------------------------------------------------
-        // 15. Fallback
-        // --------------------------------------------------
-
         return $this->jsonResponse(
             false,
             'Unable to process login',
@@ -317,9 +244,6 @@ class Auth extends CI_Controller
         );
     }
 
-    /**
-     * Common JSON Response
-     */
     private function jsonResponse(
         $status,
         $message,

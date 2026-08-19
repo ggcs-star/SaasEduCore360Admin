@@ -10,30 +10,12 @@ class Profile extends CI_Controller
     {
         parent::__construct();
 
-        // API authentication
         $this->load->library('api_auth');
 
-        // Existing student model
         $this->load->model('student_model');
     }
-
-    /**
-     * Student Profile API
-     *
-     * Method: POST
-     *
-     * URL:
-     * /user/api/profile
-     *
-     * Authorization:
-     * Bearer {token}
-     */
     public function index()
     {
-        // ---------------------------------------
-        // 1. Only POST request allowed
-        // ---------------------------------------
-
         if ($this->input->method(TRUE) !== 'POST') {
             return $this->response([
                 'status'  => false,
@@ -41,11 +23,6 @@ class Profile extends CI_Controller
                 'data'    => []
             ], 405);
         }
-
-        // ---------------------------------------
-        // 2. Authenticate Bearer Token
-        // ---------------------------------------
-
         $user_id = $this->api_auth->userId();
 
         if (empty($user_id)) {
@@ -55,10 +32,6 @@ class Profile extends CI_Controller
                 'data'    => []
             ], 401);
         }
-
-        // ---------------------------------------
-        // 3. Get Student
-        // ---------------------------------------
 
         $student = $this->student_model->get($user_id);
 
@@ -70,10 +43,6 @@ class Profile extends CI_Controller
             ], 404);
         }
 
-        // ---------------------------------------
-        // 4. Profile Response
-        // ---------------------------------------
-
         $data = [
             'student_id'   => $student['id'] ?? '',
             'admission_no' => $student['admission_no'] ?? '',
@@ -84,10 +53,6 @@ class Profile extends CI_Controller
             'image'        => $student['image'] ?? ''
         ];
 
-        // ---------------------------------------
-        // 5. Final Response
-        // ---------------------------------------
-
         return $this->response([
             'status'  => true,
             'message' => 'Profile fetched successfully',
@@ -95,9 +60,6 @@ class Profile extends CI_Controller
         ], 200);
     }
 
-    /**
-     * JSON Response
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

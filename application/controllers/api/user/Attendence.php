@@ -15,33 +15,10 @@ class Attendence extends CI_Controller
         $this->load->model('attendencetype_model');
     }
 
-    /**
-     * Get Student Attendance
-     *
-     * Method: POST
-     *
-     * URL:
-     * /user/api/attendence
-     *
-     * Headers:
-     * Authorization: Bearer {token}
-     *
-     * Body:
-     * year  = 2026
-     * month = 08
-     */
     public function index()
     {
-        // ---------------------------------------
-        // 1. Get year and month from POST
-        // ---------------------------------------
-
         $year  = $this->input->post('year');
         $month = $this->input->post('month');
-
-        // ---------------------------------------
-        // 2. Validate year and month
-        // ---------------------------------------
 
         if (empty($year) || empty($month)) {
             return $this->response([
@@ -51,7 +28,6 @@ class Attendence extends CI_Controller
             ], 400);
         }
 
-        // Validate month
         if ((int) $month < 1 || (int) $month > 12) {
             return $this->response([
                 'status'  => false,
@@ -59,11 +35,6 @@ class Attendence extends CI_Controller
                 'data'    => []
             ], 400);
         }
-
-        // ---------------------------------------
-        // 3. Authenticate using Bearer Token
-        // ---------------------------------------
-
         $user_id = $this->api_auth->userId();
 
         if (empty($user_id)) {
@@ -73,10 +44,6 @@ class Attendence extends CI_Controller
                 'data'    => []
             ], 401);
         }
-
-        // ---------------------------------------
-        // 4. Get student record
-        // ---------------------------------------
 
         $student = $this->db
             ->where('id', $user_id)
@@ -92,11 +59,6 @@ class Attendence extends CI_Controller
         }
 
         $student_id = $student['id'];
-
-        // ---------------------------------------
-        // 5. Get student session
-        // ---------------------------------------
-
         $student_session = $this->db
             ->where('student_id', $student_id)
             ->order_by('id', 'DESC')
@@ -112,11 +74,6 @@ class Attendence extends CI_Controller
         }
 
         $student_session_id = $student_session['id'];
-
-        // ---------------------------------------
-        // 6. Get number of days in month
-        // ---------------------------------------
-
         $totalDays = cal_days_in_month(
             CAL_GREGORIAN,
             (int) $month,
@@ -124,10 +81,6 @@ class Attendence extends CI_Controller
         );
 
         $attendance = [];
-
-        // ---------------------------------------
-        // 7. Fetch attendance day by day
-        // ---------------------------------------
 
         for ($day = 1; $day <= $totalDays; $day++) {
 
@@ -161,10 +114,6 @@ class Attendence extends CI_Controller
             }
         }
 
-        // ---------------------------------------
-        // 8. Return response
-        // ---------------------------------------
-
         return $this->response([
             'status'  => true,
             'message' => empty($attendance)
@@ -174,9 +123,6 @@ class Attendence extends CI_Controller
         ], 200);
     }
 
-    /**
-     * Common JSON Response
-     */
     private function response($data, $status_code = 200)
     {
         return $this->output

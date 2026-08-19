@@ -102,10 +102,9 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
 
                                                         $grd_discount = $grd_discount + $student->discount;
                                                     }
-                                                    if ($student->fine != "N/A") {
-
-                                                        $grd_fine = $fine + $student->fine;
-                                                    }
+                         if ($student->fine != "N/A") {
+    $grd_fine = $grd_fine + $student->fine;
+}
                                                     ?>
 
                                                     <tr>

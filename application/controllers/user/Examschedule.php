@@ -10,26 +10,58 @@ class ExamSchedule extends Student_Controller {
     }
 
     function index() {
-        $this->session->set_userdata('top_menu', 'Examinations');
-        $this->session->set_userdata('sub_menu', 'examSchedule/index');
-        $data['title'] = 'Exam Schedule';
-       // $class = $this->class_model->get();
-       // $data['classlist'] = $class;
-        $feecategory = $this->feecategory_model->get();
-        $data['feecategorylist'] = $feecategory;
-        $this->form_validation->set_rules('class_id', 'Class', 'trim|required|xss_clean');
-        $this->form_validation->set_rules('section_id', 'Section', 'trim|required|xss_clean');
-        $data['student_due_fee'] = array();
-        $stuid = $this->session->userdata('student');
-        $stu_record = $this->student_model->getRecentRecord($stuid['student_id']);
-        $data['class_id'] = $stu_record['class_id'];
-        $data['section_id'] = $stu_record['section_id'];
-        $examSchedule = $this->examschedule_model->getExamByClassandSection($data['class_id'], $data['section_id']);
-        $data['examSchedule'] = $examSchedule;
+
+    $this->session->set_userdata('top_menu', 'Examinations');
+    $this->session->set_userdata('sub_menu', 'examSchedule/index');
+
+    $data['title'] = 'Exam Schedule';
+
+    $feecategory = $this->feecategory_model->get();
+    $data['feecategorylist'] = $feecategory;
+
+    $data['student_due_fee'] = array();
+    $data['examSchedule'] = array();
+    $data['class_id'] = '';
+    $data['section_id'] = '';
+
+    $stuid = $this->session->userdata('student');
+
+    // Student session data not found
+    if (empty($stuid) || empty($stuid['student_id'])) {
+
         $this->load->view('layout/student/header', $data);
         $this->load->view('user/exam_schedule/examList', $data);
         $this->load->view('layout/student/footer', $data);
+
+        return;
     }
+
+    $stu_record = $this->student_model->getRecentRecord($stuid['student_id']);
+
+    // Student current session record not found
+    if (empty($stu_record)) {
+
+        $this->load->view('layout/student/header', $data);
+        $this->load->view('user/exam_schedule/examList', $data);
+        $this->load->view('layout/student/footer', $data);
+
+        return;
+    }
+
+    $data['class_id'] = $stu_record['class_id'];
+    $data['section_id'] = $stu_record['section_id'];
+
+    $examSchedule = $this->examschedule_model->getExamByClassandSection(
+        $data['class_id'],
+        $data['section_id']
+    );
+
+    $data['examSchedule'] = !empty($examSchedule) ? $examSchedule : array();
+
+    $this->load->view('layout/student/header', $data);
+    $this->load->view('user/exam_schedule/examList', $data);
+    $this->load->view('layout/student/footer', $data);
+}
 
     function view($id) {
         $data['title'] = 'Exam Schedule List';

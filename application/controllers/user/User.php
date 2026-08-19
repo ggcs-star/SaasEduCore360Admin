@@ -25,11 +25,85 @@ class User extends Student_Controller {
     function dashboard() {
 
         $this->session->set_userdata('top_menu', 'Dashboard');
-        $student_id = $this->customlib->getStudentSessionUserID();
-        $student = $this->student_model->get($student_id);
+      $student_id = $this->customlib->getStudentSessionUserID();
+$student = $this->student_model->get($student_id);
 
-        $data = array();
-        if (!empty($student)) {
+$data = array();
+
+$data['student'] = array(
+    'id' => '',
+    'firstname' => '',
+    'lastname' => '',
+    'admission_no' => '',
+    'roll_no' => '',
+    'class' => '',
+    'section' => '',
+    'image' => '',
+    'student_session_id' => '',
+    'class_id' => '',
+    'section_id' => '',
+
+    'rte' => '',
+    'mobileno' => '',
+    'cast' => '',
+    'religion' => '',
+    'email' => '',
+    'current_address' => '',
+    'permanent_address' => '',
+
+    'father_name' => '',
+    'father_phone' => '',
+    'father_occupation' => '',
+
+    'mother_name' => '',
+    'mother_phone' => '',
+    'mother_occupation' => '',
+
+    'guardian_name' => '',
+    'guardian_email' => '',
+    'guardian_relation' => '',
+    'guardian_phone' => '',
+    'guardian_occupation' => '',
+    'guardian_address' => '',
+
+    'vehroute_id' => '',
+    'hostel_room_id' => '',
+
+    // Transport
+    'route_title' => '',
+    'vehicle_no' => '',
+    'driver_name' => '',
+    'driver_contact' => '',
+
+    // Hostel
+    'hostel_name' => '',
+    'room_no' => '',
+    'room_type' => '',
+
+    // Miscellaneous
+    'blood_group' => '',
+    'house_name' => '',
+    'height' => '',
+    'weight' => '',
+    'previous_school' => '',
+    'adhar_no' => '',
+    'samagra_id' => '',
+
+    'bank_account_no' => '',
+    'bank_name' => '',
+    'ifsc_code' => ''
+);
+$data['category_list'] = array();
+$data['gradeList'] = array();
+$data['student_due_fee'] = array();
+$data['student_discount_fee'] = array();
+$data['timeline_list'] = array();
+$data['examSchedule'] = array();
+$data['student_doc'] = array();
+$data['student_doc_id'] = $student_id;
+
+if (!empty($student)) {
+    $data['student'] = $student;
             $student_session_id = $student['student_session_id'];
             $gradeList = $this->grade_model->get();
             $student_due_fee = $this->studentfeemaster_model->getStudentFees($student_session_id);
@@ -224,30 +298,69 @@ class User extends Student_Controller {
     }
 
     function getfees() {
-        $id = $this->session->userdata["student"]["student_id"];
-        // $this->auth->validate_child($id);
-        $this->session->set_userdata('top_menu', 'Fees');
-        $this->session->set_userdata('sub_menu', 'student/getFees');
-        $paymentoption = $this->customlib->checkPaypalDisplay();
-        $data['paymentoption'] = $paymentoption;
-        $data['payment_method'] = false;
-        if (!empty($this->payment_method)) {
-            $data['payment_method'] = true;
-        }
-        $student_id = $id;
-        $student = $this->student_model->get($student_id);
-        $class_id = $student['class_id'];
-        $section_id = $student['section_id'];
-        $data['title'] = 'Student Details';
-        $student_due_fee = $this->studentfeemaster_model->getStudentFees($student['student_session_id']);
-        $student_discount_fee = $this->feediscount_model->getStudentFeesDiscount($student['student_session_id']);
-        $data['student_discount_fee'] = $student_discount_fee;
-        $data['student_due_fee'] = $student_due_fee;
-        $data['student'] = $student;
-        $this->load->view('layout/student/header', $data);
-        $this->load->view('student/getfees', $data);
-        $this->load->view('layout/student/footer', $data);
+
+    $id = $this->session->userdata["student"]["student_id"];
+
+    $this->session->set_userdata('top_menu', 'Fees');
+    $this->session->set_userdata('sub_menu', 'student/getFees');
+
+    $paymentoption = $this->customlib->checkPaypalDisplay();
+
+    $data['paymentoption'] = $paymentoption;
+    $data['payment_method'] = false;
+
+    if (!empty($this->payment_method)) {
+        $data['payment_method'] = true;
     }
+
+    $student_id = $id;
+    $student = $this->student_model->get($student_id);
+
+    $data['title'] = 'Student Details';
+
+    if (empty($student)) {
+
+    $data['student'] = array(
+        'image' => '',
+        'firstname' => '',
+        'lastname' => '',
+        'admission_no' => '',
+        'roll_no' => '',
+        'class' => '',
+        'section' => '',
+        'rte' => ''
+    );
+
+    $data['student_due_fee'] = array();
+    $data['student_discount_fee'] = array();
+
+    $this->load->view('layout/student/header', $data);
+    $this->load->view('student/getfees', $data);
+    $this->load->view('layout/student/footer', $data);
+
+    return;
+}
+
+    // Student found
+    $class_id = $student['class_id'];
+    $section_id = $student['section_id'];
+
+    $student_due_fee = $this->studentfeemaster_model->getStudentFees(
+        $student['student_session_id']
+    );
+
+    $student_discount_fee = $this->feediscount_model->getStudentFeesDiscount(
+        $student['student_session_id']
+    );
+
+    $data['student_discount_fee'] = $student_discount_fee;
+    $data['student_due_fee'] = $student_due_fee;
+    $data['student'] = $student;
+
+    $this->load->view('layout/student/header', $data);
+    $this->load->view('student/getfees', $data);
+    $this->load->view('layout/student/footer', $data);
+}
 
 }
 

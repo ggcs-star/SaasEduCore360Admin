@@ -7,3 +7,356 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ============================================
+   DASHBOARD REDESIGN - COMPLETE UI
+   ============================================ */
+
+/* ----- Notification ----- */
+.dashalert {
+    background: #f0f4ff !important;
+    border-left: 4px solid #6c5ce7 !important;
+    border-radius: 14px !important;
+    padding: 14px 22px !important;
+    box-shadow: 0 2px 15px rgba(108,92,231,0.08);
+    margin-bottom: 22px;
+}
+.dashalert a {
+    color: #2d3436 !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    font-size: 14px;
+}
+.dashalert a i { color: #6c5ce7; margin-right: 10px; }
+.dashalert .close { opacity: 0.5; padding: 0 10px; font-size: 20px; }
+
+/* ----- 5 Cards Per Row ----- */
+.cards-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px 20px -10px;
+}
+.col-md-custom-5 {
+    flex: 0 0 20%;
+    max-width: 20%;
+    padding: 0 10px;
+    margin-bottom: 20px;
+}
+@media (max-width: 992px) {
+    .col-md-custom-5 { flex: 0 0 33.333%; max-width: 33.333%; }
+}
+@media (max-width: 768px) {
+    .col-md-custom-5 { flex: 0 0 50%; max-width: 50%; }
+}
+@media (max-width: 480px) {
+    .col-md-custom-5 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ----- Stat Cards ----- */
+.stat-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    height: 100%;
+    min-height: 85px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.02);
+    position: relative;
+    overflow: hidden;
+}
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    opacity: 1;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+}
+
+/* Card Bottom Border Colors */
+.stat-card-purple::after { background: #6c5ce7; }
+.stat-card-green::after { background: #00b894; }
+.stat-card-blue::after { background: #0984e3; }
+.stat-card-pink::after { background: #fd79a8; }
+.stat-card-orange::after { background: #e17055; }
+.stat-card-gray::after { background: #636e72; }
+
+/* Card Icon Styles */
+.stat-card .stat-card-icon {
+    width: 50px;
+    text-align: center;
+    margin-right: 14px;
+    flex-shrink: 0;
+}
+.stat-card .stat-card-icon i {
+    font-size: 32px;
+    display: inline-block;
+}
+
+/* Icon Colors */
+.stat-card-purple .stat-card-icon i { color: #6c5ce7; }
+.stat-card-green .stat-card-icon i { color: #00b894; }
+.stat-card-blue .stat-card-icon i { color: #0984e3; }
+.stat-card-pink .stat-card-icon i { color: #fd79a8; }
+.stat-card-orange .stat-card-icon i { color: #e17055; }
+.stat-card-gray .stat-card-icon i { color: #636e72; }
+
+.stat-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #636e72;
+}
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2d3436;
+    line-height: 1.2;
+    margin: 2px 0;
+}
+.stat-trend {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 12px;
+    border-radius: 30px;
+}
+.stat-trend.up { color: #00b894; background: #e0f2f1; }
+.stat-trend.down { color: #e17055; background: #fbe9e7; }
+
+/* ----- Chart Cards ----- */
+.chart-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px 24px 24px 24px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+    border: 1px solid rgba(108,92,231,0.06);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+.chart-card:hover {
+    box-shadow: 0 8px 40px rgba(108,92,231,0.10);
+}
+.chart-card-fees {
+    border-top: 4px solid #6c5ce7;
+}
+.chart-card-trend {
+    border-top: 4px solid #0984e3;
+}
+
+.chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.chart-card-header h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3436;
+}
+.chart-card-header h4 i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+.chart-card-fees .chart-card-header h4 i { color: #6c5ce7; }
+.chart-card-trend .chart-card-header h4 i { color: #0984e3; }
+
+/* Chart Legend */
+.chart-legend {
+    display: flex;
+    gap: 16px;
+}
+.chart-legend span {
+    font-size: 12px;
+    color: #636e72;
+    font-weight: 500;
+}
+.legend-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.legend-dot.collection-dot { background: #6c5ce7; }
+.legend-dot.expense-dot { background: #e17055; }
+
+.chart-container {
+    flex: 1;
+    min-height: 250px;
+    width: 100%;
+}
+
+/* Hide chart data labels and markers */
+.apexcharts-data-labels {
+    display: none !important;
+}
+.apexcharts-marker {
+    display: none !important;
+}
+.apexcharts-tooltip {
+    z-index: 999 !important;
+}
+.apexcharts-gridline {
+    stroke-opacity: 0.3;
+}
+
+/* ----- Donut + Transactions Row ----- */
+.donut-transactions-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+.donut-transactions-row .donut-col {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+    padding: 0 10px;
+    margin-bottom: 24px;
+}
+.donut-transactions-row .transactions-col {
+    flex: 0 0 66.667%;
+    max-width: 66.667%;
+    padding: 0 10px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 992px) {
+    .donut-transactions-row .donut-col,
+    .donut-transactions-row .transactions-col {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.donut-summary {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 16px;
+}
+.donut-item { text-align: center; }
+.donut-item .label {
+    font-size: 12px;
+    color: #636e72;
+    font-weight: 500;
+}
+.donut-item .value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3436;
+}
+.donut-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+.donut-dot.income { background: #6c5ce7; }
+.donut-dot.expense { background: #e17055; }
+
+/* ----- Recent Transactions ----- */
+.transaction-table {
+    width: 100%;
+    margin-bottom: 0;
+}
+.transaction-table td {
+    padding: 10px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f2f6;
+}
+.transaction-table tr:last-child td { border-bottom: none; }
+
+.badge-transaction {
+    border-radius: 30px;
+    padding: 5px 16px;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    display: inline-block;
+}
+.badge-income { background: #e0f2f1; color: #00796b; }
+.badge-expense { background: #fbe9e7; color: #c62828; }
+
+.transaction-amount { font-weight: 600; color: #2d3436; }
+.transaction-date { font-size: 12px; color: #b2bec3; }
+
+/* ----- Calendar ----- */
+.calendar-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px 22px 22px 22px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    margin-bottom: 24px;
+    border: 1px solid rgba(0,0,0,0.02);
+}
+.calendar-card h4 {
+    margin: 0 0 18px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3436;
+}
+.calendar-card h4 i { color: #6c5ce7; margin-right: 8px; }
+
+/* FullCalendar */
+.fc .fc-toolbar h2 { font-size: 17px; font-weight: 600; }
+.fc .fc-toolbar .fc-button {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    color: #2d3436;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 8px;
+}
+.fc .fc-toolbar .fc-button:hover {
+    background: #6c5ce7;
+    color: #fff;
+    border-color: #6c5ce7;
+}
+.fc-day-header { font-size: 11px; font-weight: 600; color: #636e72; padding: 6px 0; }
+.fc-day-number { font-size: 13px; color: #2d3436; }
+.fc-event {
+    background: #6c5ce7 !important;
+    border: none !important;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 500;
+}
+.fc-today { background: #f8f4ff !important; }
+
+/* ----- Responsive ----- */
+@media (max-width: 576px) {
+    .stat-number { font-size: 20px; }
+    .stat-card { padding: 12px 14px; min-height: 70px; }
+    .stat-card .stat-card-icon i { font-size: 24px; }
+    .chart-card { padding: 14px 16px; }
+    .chart-card-header h4 { font-size: 13px; }
+    .chart-legend span { font-size: 10px; }
+    .donut-summary { gap: 16px; }
+    .donut-item .value { font-size: 15px; }
+    .calendar-card { padding: 14px 16px; }
+    .chart-container { min-height: 200px; }
+}

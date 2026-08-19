@@ -203,6 +203,14 @@ class Expense extends Admin_Controller {
             $this->load->view('layout/footer', $data);
         }
     }
+    public function getRecentExpenses($limit = 5) {
+        $this->db->order_by('date', 'DESC');
+        $this->db->limit($limit);
+        $query = $this->db->get('expenses');
+        $data = $query->result_array();
+        foreach($data as &$row) { $row['type'] = 'Expense'; }
+        echo json_encode($data);
+    }
 
 }
 

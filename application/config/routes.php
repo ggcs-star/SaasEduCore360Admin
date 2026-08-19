@@ -69,3 +69,8 @@ $route['read/(:any)'] = 'welcome/read/$1';
 $route['frontend'] = 'welcome';
 
 
+$route['user/api/login'] = 'api/user/auth/login';
+$route['user/api/attendance'] = 'api/user/attendence/index';
+$route['user/api/subjects'] = 'api/user/subject/index';
+$route['user/api/profile'] = 'api/user/profile/index';
+$route['user/api/fees'] = 'api/user/fees/index';

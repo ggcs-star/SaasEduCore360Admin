@@ -957,9 +957,16 @@ class Student extends Admin_Controller {
                         $data['search_text'] = $this->input->post('search_text');
                         $resultlist = $this->student_model->searchByClassSection($class, $section);
                         $data['resultlist'] = $resultlist;
-                        $title = $this->classsection_model->getDetailbyClassSection($data['class_id'], $data['section_id']);
-                        $data['title'] = 'Student Details for ' . $title['class'] . "(" . $title['section'] . ")";
-                    }
+$title = $this->classsection_model->getDetailbyClassSection(
+    $data['class_id'],
+    $data['section_id']
+);
+
+if (!empty($title) && is_array($title)) {
+    $data['title'] = 'Student Details for ' . $title['class'] . '(' . $title['section'] . ')';
+} else {
+    $data['title'] = 'Student Details';
+}                    }
                 } else if ($search == 'search_full') {
                     $data['searchby'] = "text";
 

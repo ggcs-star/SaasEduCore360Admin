@@ -126,11 +126,18 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                     </td>
                                                     <td><?php echo $student['class'] . "(" . $student['section'] . ")" ?></td>
                                                     <td><?php echo $student['father_name']; ?></td>
-                                                    <td><?php
-                                                        if (!empty($student['dob'])) {
-                                                            echo date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($student['dob']));
-                                                        }
-                                                        ?></td>
+                                              <td>
+    <?php
+    if (!empty($student['dob'])) {
+        echo date(
+            $this->customlib->getSchoolDateFormat(),
+            strtotime(
+                $this->customlib->dateyyyymmddTodateformat($student['dob'])
+            )
+        );
+    }
+    ?>
+</td>
                                                     <td><?php echo $student['gender']; ?></td>
                                                     <td><?php echo $student['category']; ?></td>
                                                     <td><?php echo $student['mobileno']; ?></td>
@@ -190,7 +197,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                 <strong><b><?php echo $this->lang->line('class'); ?>: </b><?php echo $student['class'] . "(" . $student['section'] . ")" ?></strong><br>
                                                                 <b><?php echo $this->lang->line('admission_no'); ?>: </b><?php echo $student['admission_no'] ?><br/>
                                                                 <b><?php echo $this->lang->line('date_of_birth'); ?>:</b>
-            <?php echo date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($student['dob'])); ?><br>
+<?php echo !empty($student['dob']) ? date($this->customlib->getSchoolDateFormat(), strtotime($this->customlib->dateyyyymmddTodateformat($student['dob']))) : ''; ?><br>
                                                                 <b><?php echo $this->lang->line('gender'); ?>:&nbsp;&nbsp;</b><?php echo $student['gender'] ?><br>
                                                             </address>
                                                         </div>

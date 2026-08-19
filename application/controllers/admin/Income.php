@@ -239,6 +239,14 @@ class Income extends Admin_Controller {
             $this->load->view('layout/footer', $data);
         }
     }
+    public function getRecentIncome($limit = 5) {
+        $this->db->order_by('date', 'DESC');
+        $this->db->limit($limit);
+        $query = $this->db->get('income');
+        $data = $query->result_array();
+        foreach($data as &$row) { $row['type'] = 'Income'; }
+        echo json_encode($data);
+    }
 
 }
 

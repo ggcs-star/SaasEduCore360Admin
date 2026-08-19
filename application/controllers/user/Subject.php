@@ -10,18 +10,50 @@ class Subject extends Student_Controller {
     }
 
     function index() {
-        $this->session->set_userdata('top_menu', 'Subjects');
-        $this->session->set_userdata('sub_menu', 'subject/index');
-        $data['title'] = 'Add Subject';
-        $stuid = $this->session->userdata('student');
-        $stu_record = $this->student_model->getRecentRecord($stuid['student_id']);
-        $subject_result = $this->teachersubject_model->getSubjectByClsandSection($stu_record['class_id'], $stu_record['section_id']);
 
-        $data['subjectlist'] = $subject_result;
+    $this->session->set_userdata('top_menu', 'Subjects');
+    $this->session->set_userdata('sub_menu', 'subject/index');
+
+    $data['title'] = 'Add Subject';
+    $data['subjectlist'] = array();
+
+    $stuid = $this->session->userdata('student');
+
+    // Student session data not found
+    if (empty($stuid) || empty($stuid['student_id'])) {
+
         $this->load->view('layout/student/header', $data);
         $this->load->view('user/subject/subjectList', $data);
         $this->load->view('layout/student/footer', $data);
+
+        return;
     }
+
+    $stu_record = $this->student_model->getRecentRecord($stuid['student_id']);
+
+    // Student current session record not found
+    if (empty($stu_record)) {
+
+        $this->load->view('layout/student/header', $data);
+        $this->load->view('user/subject/subjectList', $data);
+        $this->load->view('layout/student/footer', $data);
+
+        return;
+    }
+
+    $subject_result = $this->teachersubject_model->getSubjectByClsandSection(
+        $stu_record['class_id'],
+        $stu_record['section_id']
+    );
+
+    $data['subjectlist'] = !empty($subject_result)
+        ? $subject_result
+        : array();
+
+    $this->load->view('layout/student/header', $data);
+    $this->load->view('user/subject/subjectList', $data);
+    $this->load->view('layout/student/footer', $data);
+}
 
     function view($id) {
         $data['title'] = 'Subject List';

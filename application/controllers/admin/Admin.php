@@ -50,9 +50,26 @@ class Admin extends Admin_Controller {
         $total_students = 0;
         $total_teachers = 0;
         $ar = $this->startmonthandend();
-        $year_str_month = $Current_year . '-' . $ar[0] . '-01';
-        $year_end_month = date("Y-m-t", strtotime($Next_year . '-' . $ar[1] . '-01'));
-        $getDepositeAmount = $this->studentfeemaster_model->getDepositAmountBetweenDate($year_str_month, $year_end_month);
+
+$current_year = date('Y');
+
+if ((int)date('m') < $ar[0]) {
+    $session_start_year = $current_year - 1;
+} else {
+    $session_start_year = $current_year;
+}
+
+$session_end_year = $session_start_year + 1;
+
+$year_str_month = $session_start_year . '-' . str_pad($ar[0], 2, '0', STR_PAD_LEFT) . '-01';
+$year_end_month = date(
+    "Y-m-t",
+    strtotime($session_end_year . '-' . str_pad($ar[1], 2, '0', STR_PAD_LEFT) . '-01')
+);
+$this->db->select('*');
+$this->db->from('student_fees_deposite');
+$query = $this->db->get();
+$getDepositeAmount = $query->result_array();
 
         //======================Current Month Collection ==============================
         $first_day_this_month = date('Y-m-01');
@@ -78,23 +95,24 @@ class Admin extends Admin_Controller {
         }
         $data["roles"] = $count_roles;
 
-        //======================== get collection by month ==========================
+                //======================== get collection by month ==========================
         $start_month = strtotime($year_str_month);
         $start = strtotime($year_str_month);
         $end = strtotime($year_end_month);
         $coll_month = array();
         $s = array();
         $total_month = array();
-        while ($start_month <= $end) {
+        
+                while ($start_month <= $end) {
             $total_month[] = date('M', $start_month);
             $month_start = date('Y-m-d', $start_month);
             $month_end = date("Y-m-t", $start_month);
-            $return = $this->whatever($getDepositeAmount, $month_start, $month_end);
-            if ($return) {
-                $s[] = $return;
-            } else {
-                $s[] = "0.00";
-            }
+            
+            // Forces the calculation to happen correctly by directly passing the data
+            $temp_return = $this->whatever($getDepositeAmount, $month_start, $month_end);
+            
+            // Forcefully assign the data to the array
+            $s[] = ($temp_return > 0) ? $temp_return : 0;
 
             $start_month = strtotime("+1 month", $start_month);
         }
@@ -116,8 +134,10 @@ class Admin extends Admin_Controller {
 
             $start_session_month = strtotime("+1 month", $start_session_month);
         }
-
+         $s = array_values($s);
+        $s = array_map('intval', $s);
         $data['yearly_collection'] = $s;
+        $data['yearly_collection_array'] = $s;
         $data['yearly_expense'] = $ex;
         $data['total_month'] = $total_month;
         //======================= current month collection /expense ===================
@@ -480,28 +500,28 @@ class Admin extends Admin_Controller {
         $result = $this->admin_model->getMonthlyExpense();
         return $result;
     }
-
     function whatever($feecollection_array, $start_month_date, $end_month_date) {
         $return_amount = 0;
         $st_date = strtotime($start_month_date);
         $ed_date = strtotime($end_month_date);
+        
         if (!empty($feecollection_array)) {
             while ($st_date <= $ed_date) {
                 $date = date('Y-m-d', $st_date);
                 foreach ($feecollection_array as $key => $value) {
-
-                    if ($value['date'] == $date) {
-
-
-                        $return_amount = $return_amount + $value['amount'] + $value['amount_fine'];
+                    // YE LINE CHANGE KI HAI: Table mein 'date' column nahi hai, isliye 'amount_detail' ke andar se dhundho
+                    if (isset($value['amount_detail'])) {
+                        $details = json_decode($value['amount_detail'], true);
+                        foreach ($details as $detail) {
+                            if (strpos($detail['date'], $date) !== false || $detail['date'] == $date) {
+                                $return_amount = $return_amount + $detail['amount'] + (isset($detail['amount_fine']) ? $detail['amount_fine'] : 0);
+                            }
+                        }
                     }
                 }
                 $st_date = $st_date + 86400;
             }
-        } else {
-            
         }
-
         return $return_amount;
     }
 

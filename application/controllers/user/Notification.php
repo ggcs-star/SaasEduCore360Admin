@@ -10,17 +10,38 @@ class Notification extends Student_Controller {
     }
 
     function index() {
-        $this->session->set_userdata('sub_menu', 'user/notification');
-        $data['title'] = 'Notifications';
-        $student_id = $this->customlib->getStudentSessionUserID();
-        $student = $this->student_model->get($student_id);
-        $student_id = $student['id'];
-        $notifications = $this->notification_model->getNotificationForStudent($student_id);
-        $data['notificationlist'] = $notifications;
+
+    $this->session->set_userdata('sub_menu', 'user/notification');
+
+    $data['title'] = 'Notifications';
+    $data['notificationlist'] = array();
+
+    $student_id = $this->customlib->getStudentSessionUserID();
+
+    $student = $this->student_model->get($student_id);
+
+    // Student record not found
+    if (empty($student)) {
+
         $this->load->view('layout/student/header', $data);
         $this->load->view('user/notification/notificationList', $data);
         $this->load->view('layout/student/footer', $data);
+
+        return;
     }
+
+    $student_id = $student['id'];
+
+    $notifications = $this->notification_model->getNotificationForStudent($student_id);
+
+    $data['notificationlist'] = !empty($notifications)
+        ? $notifications
+        : array();
+
+    $this->load->view('layout/student/header', $data);
+    $this->load->view('user/notification/notificationList', $data);
+    $this->load->view('layout/student/footer', $data);
+}
 
     function updatestatus() {
         $notification_id = $this->input->post('notification_id');

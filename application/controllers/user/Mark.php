@@ -79,52 +79,100 @@ class Mark extends Student_Controller {
     }
 
     function marklist() {
-        $this->session->set_userdata('top_menu', 'Examinations');
-        $this->session->set_userdata('sub_menu', 'mark/marklist');
-        $student_id = $this->customlib->getStudentSessionUserID();
-        $student = $this->student_model->get($student_id);
-        $class_id = $student['class_id'];
-        $section_id = $student['section_id'];
-        $data['title'] = 'Student Details';
-        $gradeList = $this->grade_model->get();
-        $data['gradeList'] = $gradeList;
-        $student_due_fee = $this->studentfee_model->getDueFeeBystudent($student['class_id'], $student['section_id'], $student_id);
-        $data['student_due_fee'] = $student_due_fee;
-        $transport_fee = $this->studenttransportfee_model->getTransportFeeByStudent($student['student_session_id']);
-        $data['transport_fee'] = $transport_fee;
-        $examList = $this->examschedule_model->getExamByClassandSection($student['class_id'], $student['section_id']);
-        $data['examSchedule'] = array();
-        if (!empty($examList)) {
-            $new_array = array();
-            $data['examSchedule']['status'] = "yes";
-            foreach ($examList as $ex_key => $ex_value) {
-                $array = array();
-                $x = array();
-                $exam_id = $ex_value['exam_id'];
-                $exam_subjects = $this->examschedule_model->getresultByStudentandExam($exam_id, $student['id']);
-                foreach ($exam_subjects as $key => $value) {
-                    $exam_array = array();
-                    $exam_array['exam_schedule_id'] = $value['exam_schedule_id'];
-                    $exam_array['exam_id'] = $value['exam_id'];
-                    $exam_array['full_marks'] = $value['full_marks'];
-                    $exam_array['passing_marks'] = $value['passing_marks'];
-                    $exam_array['exam_name'] = $value['name'];
-                    $exam_array['exam_type'] = $value['type'];
-                    $exam_array['attendence'] = $value['attendence'];
-                    $exam_array['get_marks'] = $value['get_marks'];
-                    $x[] = $exam_array;
-                }
-                $array['exam_name'] = $ex_value['name'];
-                $array['exam_result'] = $x;
-                $new_array[] = $array;
-            }
-            $data['examSchedule'] = $new_array;
-        }
-        $data['student'] = $student;
+
+    $this->session->set_userdata('top_menu', 'Examinations');
+    $this->session->set_userdata('sub_menu', 'mark/marklist');
+
+    $student_id = $this->customlib->getStudentSessionUserID();
+    $student = $this->student_model->get($student_id);
+
+    $data['title'] = 'Student Details';
+    $data['gradeList'] = $this->grade_model->get();
+    $data['student_due_fee'] = array();
+    $data['transport_fee'] = array();
+    $data['examSchedule'] = array();
+    $data['student'] = array();
+
+    // Student record not available
+    if (empty($student)) {
+
         $this->load->view('layout/student/header', $data);
         $this->load->view('user/mark/markList', $data);
         $this->load->view('layout/student/footer', $data);
+
+        return;
     }
+
+    $class_id = $student['class_id'];
+    $section_id = $student['section_id'];
+
+    $student_due_fee = $this->studentfee_model->getDueFeeBystudent(
+        $class_id,
+        $section_id,
+        $student_id
+    );
+
+    $data['student_due_fee'] = $student_due_fee;
+
+    $transport_fee = $this->studenttransportfee_model->getTransportFeeByStudent(
+        $student['student_session_id']
+    );
+
+    $data['transport_fee'] = $transport_fee;
+
+    $examList = $this->examschedule_model->getExamByClassandSection(
+        $class_id,
+        $section_id
+    );
+
+    if (!empty($examList)) {
+
+        $new_array = array();
+        $data['examSchedule']['status'] = "yes";
+
+        foreach ($examList as $ex_key => $ex_value) {
+
+            $array = array();
+            $x = array();
+
+            $exam_id = $ex_value['exam_id'];
+
+            $exam_subjects = $this->examschedule_model->getresultByStudentandExam(
+                $exam_id,
+                $student['id']
+            );
+
+            foreach ($exam_subjects as $key => $value) {
+
+                $exam_array = array();
+
+                $exam_array['exam_schedule_id'] = $value['exam_schedule_id'];
+                $exam_array['exam_id'] = $value['exam_id'];
+                $exam_array['full_marks'] = $value['full_marks'];
+                $exam_array['passing_marks'] = $value['passing_marks'];
+                $exam_array['exam_name'] = $value['name'];
+                $exam_array['exam_type'] = $value['type'];
+                $exam_array['attendence'] = $value['attendence'];
+                $exam_array['get_marks'] = $value['get_marks'];
+
+                $x[] = $exam_array;
+            }
+
+            $array['exam_name'] = $ex_value['name'];
+            $array['exam_result'] = $x;
+
+            $new_array[] = $array;
+        }
+
+        $data['examSchedule'] = $new_array;
+    }
+
+    $data['student'] = $student;
+
+    $this->load->view('layout/student/header', $data);
+    $this->load->view('user/mark/markList', $data);
+    $this->load->view('layout/student/footer', $data);
+}
 
     function view($id) {
         $data['title'] = 'Mark List';
